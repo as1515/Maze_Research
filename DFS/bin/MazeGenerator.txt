@@ -1,0 +1,103 @@
+import java.util.ArrayList;
+import java.util.Stack;
+
+public class MazeGenerator {
+    private int cols, rows;
+    private Cell[][] grid;
+    private Stack<Cell> stack = new Stack<>();
+
+    public class Cell {
+        int x, y;
+        boolean visited = false;
+        boolean[] walls = { true, true, true, true };
+
+        Cell(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    public MazeGenerator(int cols, int rows) {
+        this.cols = cols;
+        this.rows = rows;
+        grid = new Cell[cols][rows];
+        for (int i = 0; i < cols; i++) {
+            for (int j = 0; j < rows; j++) {
+                grid[i][j] = new Cell(i, j);
+            }
+        }
+        System.out.println(grid);
+    }
+
+    public void generateMaze() {
+        Cell current = grid[0][0];
+        stack.push(current);
+        current.visited = true;
+
+        while (!stack.isEmpty()) {
+            current = stack.peek();
+            Cell next = chooseUnvisitedNeighbor(current.x, current.y);
+            if (next != null) {
+                removeWalls(current, next);
+                stack.push(next);
+                next.visited = true;
+            } else {
+                stack.pop();
+            }
+        }
+    }
+
+    private Cell chooseUnvisitedNeighbor(int x, int y) {
+        ArrayList<Cell> neighbors = new ArrayList<>();
+
+        if (x > 0 && !grid[x - 1][y].visited) {
+            neighbors.add(grid[x - 1][y]);
+        }
+
+        if (y > 0 && !grid[x][y - 1].visited) {
+            neighbors.add(grid[x][y - 1]);
+        }
+
+        if (x < cols - 1 && !grid[x + 1][y].visited) {
+            neighbors.add(grid[x + 1][y]);
+        }
+
+        if (y < rows - 1 && !grid[x][y + 1].visited) {
+            neighbors.add(grid[x][y + 1]);
+        }
+
+        if (neighbors.size() > 0) {
+            int index = (int) (Math.random() * neighbors.size());
+            System.out.println(neighbors.size());
+            return neighbors.get(index);
+        } else {
+            return null;
+        }
+    }
+
+    private void removeWalls(Cell current, Cell next) {
+        int dx = next.x - current.x;
+        int dy = next.y - current.y;
+
+        if (dx == 1) {
+            current.walls[1] = false;
+            next.walls[3] = false;
+        } else if (dx == -1) {
+            current.walls[3] = false;
+            next.walls[1] = false;
+        }
+
+        if (dy == 1) {
+            current.walls[2] = false;
+            next.walls[0] = false;
+        } else if (dy == -1) {
+            current.walls[0] = false;
+            next.walls[2] = false;
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        MazeGenerator maze = new MazeGenerator(10, 10);
+        maze.generateMaze();
+    }
+}
